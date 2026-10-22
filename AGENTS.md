@@ -9,7 +9,10 @@ Trellis 通过这里的 `index.json` 发现 workflow，并在 `trellis init` 或
 ```
 index.json                         # marketplace 索引，Trellis 从这里发现模板
 workflows/<id>/workflow.md         # 一个 workflow 一个文件
+overlay/                           # Native AI 模式配套的技能/命令/AGENTS 片段
+scripts/trellis-merge-new.py       # 上游 .new 合并脚本
 scripts/validate.py                # 本地校验 index + workflow 契约
+install-native-ai.py               # 把 overlay 写入目标项目
 README.md                          # 给使用者看的快速说明
 AGENTS.md                          # 给维护者/AI 看的开发约定（本文件）
 ```
@@ -50,7 +53,7 @@ trellis init --workflow native-ai \
 
 1. **从真实项目同步**（推荐）：
    ```bash
-   cp ~/www/youxiang/.trellis/workflow.md \
+   cp /path/to/project/.trellis/workflow.md \
       workflows/native-ai/workflow.md
    ```
    或者直接编辑 `workflows/native-ai/workflow.md`。
@@ -113,15 +116,45 @@ Trellis 的 hook 只解析 `workflow.md`，不保存 fallback 文案，所以：
 
 ## 模板边界
 
-workflow 模板只覆盖 `.trellis/workflow.md`。Native AI 模式还包括：
+workflow 模板只覆盖 `.trellis/workflow.md`。`trellis init --workflow` 不会
+安装 overlay 里的技能、命令或 `AGENTS.md` 片段，所以完整安装是两步：
+
+```bash
+# 1. workflow
+trellis init --workflow native-ai \
+  --workflow-source git@github.com:terranc/trellis-workflows.git -y --claude
+
+# 2. 配套文件
+git clone git@github.com:terranc/trellis-workflows.git /tmp/trellis-workflows
+python3 /tmp/trellis-workflows/install-native-ai.py --root .
+```
+
+`overlay/` 当前包含：
 
 - `trellis-brainstorm` 技能（PRD + design，不创建 implement.md）
-- `trellis-start` / `trellis-continue` 的路由文案
+- `trellis-start` / `trellis-continue` 技能路由
+- `continue` 命令（claude / cursor / opencode）
 - 根目录 `AGENTS.md` 的 Native AI 约定
-- 可选的 `scripts/trellis-merge-new.py`（合并上游 `.new`）
+- `scripts/trellis-merge-new.py`（合并上游 `.new`）
 
-这些需要在目标项目里同步。可以先把它们放在本仓库的 `overlay/` 下，再由
-安装脚本写入目标项目；不要假装 `trellis init` 会自动完成这些。
+安装器只更新目标项目里已经存在的技能/命令文件；不存在的平台目录会跳过。
+写入前备份到 `.trellis/.backup-native-ai-<时间戳>/`，内容相同则跳过，可重复执行。
+
+## 运行时契约
+
+参考 Trellis 的“定制 Workflow”文档，以下约定被脚本消费：
+
+- Phase 标题层级 `## Phase X` + `#### X.Y` 被
+  `get_context.py --mode phase --step X.Y` 解析。不要改成 `###`，也不要改
+  `X.Y` 的编号格式。
+- `[workflow-state:STATUS]` 块由 `inject-workflow-state.py` 每轮解析；保持
+  简短（≈200 字节以内），不要写长段落。
+- 自定义状态只需要一个 `[workflow-state:<name>]` 块，并把
+  `task.json.status` 设成同名值；不需要预注册。
+- 修改生效时间：breadcrumb 文本下一条用户消息生效；Phase/step 正文和
+  Skill Routing 下一个会话生效。
+- 如果模板包含 `### Skill Routing` 或 `### DO NOT skip skills`，保持它们与
+  Phase 内容一致；SessionStart 会把两者一起内联给 AI。
 
 ## 校验脚本做什么
 
