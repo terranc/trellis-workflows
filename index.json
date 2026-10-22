@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "native-ai",
+      "type": "workflow",
+      "name": "Native AI Workflow",
+      "description": "PRD + design alignment only; implementation stays in the main session; no implement.md or sub-agent dispatch.",
+      "path": "workflows/native-ai/workflow.md",
+      "tags": ["workflow", "native-ai", "prd", "design"]
+    }
+  ]
+}
