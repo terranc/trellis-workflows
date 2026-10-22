@@ -37,8 +37,8 @@ git clone git@github.com:terranc/trellis-workflows.git /tmp/trellis-workflows
 - `trellis-start` / `trellis-continue` 技能
 - `continue` 命令（claude / cursor / opencode）
 
-安装器默认**不修改**目标项目的 `AGENTS.md`，也**不复制** merge 脚本。
-Native AI 行为由 `.trellis/workflow.md` 和这些技能承担。
+安装器只更新技能和 continue 命令。Native AI 行为由 `.trellis/workflow.md`
+和这些技能承担。
 
 写入前会备份到 `.trellis/.backup-native-ai-<时间戳>/`，可重复执行。
 
@@ -58,16 +58,31 @@ python3 /tmp/trellis-workflows/install-native-ai.py --root .
 index.json
 workflows/native-ai/workflow.md     # workflow 模板（trellis init 读取）
 overlay/                            # 技能和命令
-scripts/trellis-merge-new.py        # 维护本仓库时用的 .new 合并工具（不安装到项目）
 scripts/validate.py                 # index + workflow 契约校验
 install-native-ai.py                # 把 overlay 写入目标项目
-AGENTS.md                           # 维护约定
 ```
+
+## 维护
+
+新增模板：
+
+1. 创建 `workflows/<id>/workflow.md`
+2. 在 `index.json` 加一条 `type: "workflow"` 的条目
+3. 运行 `python3 scripts/validate.py`
+
+约定：
+
+- `id` 发布后不要改，项目会用它做 `--workflow`
+- `path` 必须在仓库内、以 `.md` 结尾
+- `[workflow-state:STATUS]` 开闭标签必须成对
+- 至少保留 `no_task`、`planning`、`in_progress` 三个核心状态
+- 修改后可以本地验证：
+  ```bash
+  trellis workflow --list -m gh:terranc/trellis-workflows
+  ```
 
 ## 校验
 
 ```bash
 python3 scripts/validate.py
 ```
-
-维护约定见 `AGENTS.md`。

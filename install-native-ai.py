@@ -7,8 +7,6 @@
     - 更新 trellis-brainstorm / trellis-start / trellis-continue 技能
     - 更新 continue 命令（claude / cursor / opencode）
 
-它默认不修改目标项目的 AGENTS.md，也不复制 merge 脚本。
-
 用法：
 
     python3 install-native-ai.py --root /path/to/project
