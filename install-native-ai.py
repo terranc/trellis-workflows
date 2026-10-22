@@ -83,7 +83,9 @@ def write_bytes(path: Path, content: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as handle:
         handle.write(content)
-    if mode is not None:
+    if path.suffix in {".py", ".sh"}:
+        os.chmod(path, (mode or 0o755) | 0o111)
+    elif mode is not None:
         os.chmod(path, mode)
 
 
