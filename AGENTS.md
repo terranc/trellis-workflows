@@ -19,14 +19,15 @@ AGENTS.md                          # 给维护者/AI 看的开发约定（本文
 
 ## Trellis 如何消费
 
-公开仓库：
+当前仓库是 **public**，使用 `gh:` source：
 
 ```bash
 trellis workflow --list -m gh:terranc/trellis-workflows
-trellis init --workflow native-ai --workflow-source gh:terranc/trellis-workflows -y
+trellis init --workflow native-ai \
+  --workflow-source gh:terranc/trellis-workflows -y --claude
 ```
 
-当前仓库是 **private**，`gh:` 的 raw HTTP 读取不可用，请用 SSH source：
+如果以后改成 private 或需要 SSH，可以用：
 
 ```bash
 trellis workflow --list -m git@github.com:terranc/trellis-workflows.git
@@ -66,9 +67,9 @@ trellis init --workflow native-ai \
    tmp=$(mktemp -d) && cd "$tmp" && git init
    trellis init --claude -y \
      --workflow native-ai \
-     --workflow-source git@github.com:terranc/trellis-workflows.git
+     --workflow-source gh:terranc/trellis-workflows
    head -40 .trellis/workflow.md
-   trellis workflow --list -m git@github.com:terranc/trellis-workflows.git
+   trellis workflow --list -m gh:terranc/trellis-workflows
    ```
 4. **提交与推送**：
    ```bash
@@ -76,8 +77,8 @@ trellis init --workflow native-ai \
    git commit -m "feat(native-ai): ..."
    git push origin main
    ```
-   行为变化建议打 tag，例如 `v0.2.0`，方便项目锁定版本
-   （`#v0.2.0` 可加在 source 后面）。
+   行为变化建议打 tag，例如 `v0.2.2`。公开仓库可以用
+   `gh:terranc/trellis-workflows#v0.2.2` 锁定版本。
 
 ## workflow.md 契约
 

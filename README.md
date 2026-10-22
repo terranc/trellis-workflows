@@ -7,17 +7,24 @@ Trellis workflow 模板市场。当前包含：
 
 ## 完整安装（新项目）
 
-私有仓库（当前）用 SSH source：
+公开仓库用 `gh:` source：
 
 ```bash
 # 1. 初始化 Trellis，并选用 native-ai workflow
 trellis init --claude -y \
   --workflow native-ai \
-  --workflow-source git@github.com:terranc/trellis-workflows.git
+  --workflow-source gh:terranc/trellis-workflows
 
 # 2. 写入技能、AGENTS.md 约定和 merge 脚本
-git clone git@github.com:terranc/trellis-workflows.git /tmp/trellis-workflows
+git clone https://github.com/terranc/trellis-workflows.git /tmp/trellis-workflows
 python3 /tmp/trellis-workflows/install-native-ai.py --root .
+```
+
+私有 fork 或需要 SSH 时，把 source 换成：
+
+```bash
+--workflow-source git@github.com:terranc/trellis-workflows.git
+git clone git@github.com:terranc/trellis-workflows.git /tmp/trellis-workflows
 ```
 
 第 2 步会更新：
@@ -34,16 +41,10 @@ python3 /tmp/trellis-workflows/install-native-ai.py --root .
 
 ```bash
 trellis workflow -t native-ai \
-  -m git@github.com:terranc/trellis-workflows.git -f
+  -m gh:terranc/trellis-workflows -f
 
-git clone git@github.com:terranc/trellis-workflows.git /tmp/trellis-workflows
+git clone https://github.com/terranc/trellis-workflows.git /tmp/trellis-workflows
 python3 /tmp/trellis-workflows/install-native-ai.py --root .
-```
-
-如果以后改成公开仓库，可以把 source 换成：
-
-```bash
---workflow-source gh:terranc/trellis-workflows
 ```
 
 ## 结构
