@@ -19,7 +19,10 @@ AGENTS.md                          # 给维护者/AI 看的开发约定（本文
 
 ## Trellis 如何消费
 
-当前仓库是 **public**，使用 `gh:` source：
+当前仓库是 **public**，使用 `gh:` source。注意：`--workflow-source` 只是
+查找源，必须同时写 `--workflow native-ai`；只写 source 仍会安装默认的
+`native` workflow。`trellis init` 也没有“交互选择 workflow 模板”的步骤，
+workflow 只能通过 `--workflow` 指定。
 
 ```bash
 trellis workflow --list -m gh:terranc/trellis-workflows

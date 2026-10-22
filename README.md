@@ -7,7 +7,8 @@ Trellis workflow 模板市场。当前包含：
 
 ## 完整安装（新项目）
 
-公开仓库用 `gh:` source：
+公开仓库用 `gh:` source。注意：`--workflow-source` 只是查找源，必须同时写
+`--workflow native-ai`；只写 source 仍会安装默认的 `native` workflow。
 
 ```bash
 # 1. 初始化 Trellis，并选用 native-ai workflow
