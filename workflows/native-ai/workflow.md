@@ -77,6 +77,30 @@ python3 ./.trellis/scripts/task.py create-pr [name] [--dry-run]
 
 **Current-task mechanism**: `task.py create` creates the task directory and (when session identity is available) auto-sets the per-session active-task pointer so the planning breadcrumb fires immediately. `task.py start` writes the same pointer (idempotent if already set) and flips `task.json.status` from `planning` to `in_progress`. State is stored under `.trellis/.runtime/sessions/`. If no context key is available from hook input, `TRELLIS_CONTEXT_ID`, or a platform-native session environment variable, there is no active task and `task.py start` fails with a session identity hint. `task.py finish` deletes the current session file (status unchanged). `task.py archive <task>` writes `status=completed`, moves the directory to `archive/`, and deletes any runtime session files that still point at the archived task.
 
+### Task Hold
+
+A hold pauses a task without touching its state machine. It is metadata in
+`task.json.meta`, so `status`, the phase breadcrumbs, and the board columns all
+stay as they are.
+
+```bash
+# Mark on hold — status stays in_progress
+python3 ./.trellis/scripts/task.py set-meta <task-dir> hold blocked
+python3 ./.trellis/scripts/task.py set-meta <task-dir> hold_reason "waiting on PR #123"
+
+# Clear the hold
+python3 ./.trellis/scripts/task.py set-meta <task-dir> hold ""
+```
+
+- `meta.hold` reads as held when it is `blocked` or `paused`; any other value,
+  including an empty string, means not held.
+- `meta.hold_reason` is free text shown next to the hold badge.
+- Use hold for work blocked on something outside the session. Do not invent a
+  status for it: unknown statuses land in the board's `other` column and drop the
+  per-turn breadcrumb.
+- `task.py set-meta` ships with Trellis 0.6.15+. On older projects, write the same
+  two keys into `task.json` directly; nothing else reads them.
+
 ### Workspace System
 
 Records every AI session for cross-session tracking under `.trellis/workspace/<developer>/`.

@@ -6,8 +6,8 @@
 
     - 更新 trellis-brainstorm / trellis-start / trellis-continue 技能
     - 更新 continue 命令（claude / cursor / opencode）
-    - 在根目录 AGENTS.md 追加 Native AI Mode 约定
-    - 复制 scripts/trellis-merge-new.py
+
+它默认不修改目标项目的 AGENTS.md，也不复制 merge 脚本。
 
 用法：
 
@@ -103,27 +103,6 @@ def copy_overlay(source: Path, target: Path, root: Path, backup_dir: Path, dry_r
     return f"+ 写入 {rel(target, root)}{suffix}"
 
 
-def install_agents_section(source: Path, root: Path, backup_dir: Path, dry_run: bool) -> str:
-    target = root / "AGENTS.md"
-    section = source.read_text(encoding="utf-8").rstrip() + "\n"
-    marker = "## Native AI Mode"
-    if target.exists():
-        current = target.read_text(encoding="utf-8")
-        if marker in current:
-            return "= AGENTS.md 已包含 Native AI Mode"
-        new_content = current.rstrip() + "\n\n" + section
-        if dry_run:
-            return "[dry-run] 追加 AGENTS.md Native AI Mode"
-        saved = backup(target, root, backup_dir)
-        target.write_text(new_content, encoding="utf-8")
-        suffix = f"（备份：{rel(saved, root)}）" if saved else ""
-        return f"+ 追加 AGENTS.md Native AI Mode{suffix}"
-    if dry_run:
-        return "[dry-run] 创建 AGENTS.md"
-    write_bytes(target, section.encode("utf-8"))
-    return "+ 创建 AGENTS.md"
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="把 Native AI workflow 的配套文件写入已初始化的 Trellis 项目。",
@@ -151,12 +130,6 @@ def main() -> int:
             seen.add(real)
         results.append(copy_overlay(source, target, root, backup_dir, args.dry_run))
 
-    # 脚本
-    add(
-        REPO_ROOT / "scripts" / "trellis-merge-new.py",
-        root / "scripts" / "trellis-merge-new.py",
-    )
-
     brainstorm = OVERLAY / "skills" / "trellis-brainstorm" / "SKILL.md"
     for target in BRAINSTORM_TARGETS:
         path = root / target
@@ -179,12 +152,6 @@ def main() -> int:
         path = root / target_rel
         if path.exists():
             add(REPO_ROOT / source_rel, path)
-
-    results.append(
-        install_agents_section(
-            OVERLAY / "AGENTS.native-ai.md", root, backup_dir, args.dry_run
-        )
-    )
 
     print(f"目标项目：{root}")
     if args.dry_run:

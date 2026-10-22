@@ -9,8 +9,8 @@ Trellis 通过这里的 `index.json` 发现 workflow，并在 `trellis init` 或
 ```
 index.json                         # marketplace 索引，Trellis 从这里发现模板
 workflows/<id>/workflow.md         # 一个 workflow 一个文件
-overlay/                           # Native AI 模式配套的技能/命令/AGENTS 片段
-scripts/trellis-merge-new.py       # 上游 .new 合并脚本
+overlay/                           # Native AI 模式配套的技能和命令
+scripts/trellis-merge-new.py       # 维护本仓库用的 .new 合并工具（不安装到项目）
 scripts/validate.py                # 本地校验 index + workflow 契约
 install-native-ai.py               # 把 overlay 写入目标项目
 README.md                          # 给使用者看的快速说明
@@ -121,7 +121,7 @@ Trellis 的 hook 只解析 `workflow.md`，不保存 fallback 文案，所以：
 ## 模板边界
 
 workflow 模板只覆盖 `.trellis/workflow.md`。`trellis init --workflow` 不会
-安装 overlay 里的技能、命令或 `AGENTS.md` 片段，所以完整安装是两步：
+安装 overlay 里的技能或命令，所以完整安装是两步：
 
 ```bash
 # 1. workflow
@@ -138,10 +138,9 @@ python3 /tmp/trellis-workflows/install-native-ai.py --root .
 - `trellis-brainstorm` 技能（PRD + design，不创建 implement.md）
 - `trellis-start` / `trellis-continue` 技能路由
 - `continue` 命令（claude / cursor / opencode）
-- 根目录 `AGENTS.md` 的 Native AI 约定
-- `scripts/trellis-merge-new.py`（合并上游 `.new`）
 
 安装器只更新目标项目里已经存在的技能/命令文件；不存在的平台目录会跳过。
+它默认**不修改**目标项目的 `AGENTS.md`，也**不复制** `scripts/trellis-merge-new.py`。
 写入前备份到 `.trellis/.backup-native-ai-<时间戳>/`，内容相同则跳过，可重复执行。
 
 ## 运行时契约
@@ -155,6 +154,9 @@ python3 /tmp/trellis-workflows/install-native-ai.py --root .
   简短（≈200 字节以内），不要写长段落。
 - 自定义状态只需要一个 `[workflow-state:<name>]` 块，并把
   `task.json.status` 设成同名值；不需要预注册。
+- task hold 不占用 status：它是 `task.json.meta.hold`（`blocked` / `paused`）
+  加 `meta.hold_reason`，由模板 `### Task Hold` 段落和看板共同约定。新增状态时
+  不要把 hold 改造成 status。
 - 修改生效时间：breadcrumb 文本下一条用户消息生效；Phase/step 正文和
   Skill Routing 下一个会话生效。
 - 如果模板包含 `### Skill Routing` 或 `### DO NOT skip skills`，保持它们与
